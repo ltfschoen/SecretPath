@@ -65,7 +65,7 @@
   timeout: 1
 
 "534352": #Scroll
-  active: true
+  active: false
   type: "evm"
   chain_id: "534352"
   api_endpoint: https://scroll.drpc.org
@@ -209,8 +209,14 @@
   active: false
   type: "evm"
   chain_id: "11155111"
+  # TODO: Replace with getblock.io API link using .env environment variables
   api_endpoint: https://eth-sepolia-public.unifra.io
-  contract_address: "0x3879E146140b627a5C858a08e507B171D9E43139"
+  # Secret Network's EVM gateway contract address
+  # contract_address: "0x3879E146140b627a5C858a08e507B171D9E43139"
+  # Custom EVM gateway contract address
+  # Note: This must match the latest deployed address that should be added here:
+  # https://github.com/svub/nunya/pull/33/files#diff-df2c544bd7bd87ce0870dbc5952022a5bb104209ace15b6b8661eca1af874900R23
+  contract_address: "0x1E4B12A9F82b33DA1127B27861EFf5E652de7a6F"
   timeout: 1
 
 "80002": #Polygon Amoy
@@ -246,7 +252,7 @@
   timeout: 0.5
 
 "534351": #Scroll Sepolia
-  active: true
+  active: false
   type: "evm"
   chain_id: "534351"
   api_endpoint: https://sepolia-rpc.scroll.io
@@ -414,10 +420,33 @@
   timeout: 1
 
 "pulsar-3":
-  active: true
+  active: false
   type: "secret"
   chain_id: "pulsar-3"
-  api_endpoint: "http://81.171.3.86:1317"
+  api_endpoint: "https://api.pulsar.scrttestnet.com"
   contract_address: "secret10ex7r7c4y704xyu086lf74ymhrqhypayfk7fkj"
   code_hash: "ad8ca07ffba1cb26ebf952c29bc4eced8319c171430993e5b5089887f27b3f70"
   feegrant_address: "secret1gutgtpw0caqfsp8ja0r5yecv8jxz2y8vhpnck8"
+
+# Localhost Chains
+
+"31337": # Ethereum Localhost
+  active: true
+  type: "evm"
+  chain_id: "31337"
+  # TODO: Replace with getblock.io API link using .env environment variables
+  api_endpoint: "http://127.0.0.1:8545"
+  # Custom EVM gateway contract address
+  # Note: This must match the latest deployed address that should be added here:
+  # https://github.com/svub/nunya/pull/33/files#diff-df2c544bd7bd87ce0870dbc5952022a5bb104209ace15b6b8661eca1af874900R16
+  contract_address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+  timeout: 1
+
+"secretdev-1": # Secret Localhost 
+  active: true
+  type: "secret"
+  chain_id: "secretdev-1"
+  api_endpoint: "http://127.0.0.1:1317"
+  contract_address: "secret1mfk7n6mc2cg6lznujmeckdh4x0a5ezf6hx6y8q"
+  code_hash: "97653655266e70774ab8f0bf2ee2c17ff4a7f47d2e2fd477c69b52476841277b"
+  feegrant_address: "secret1ap26qrlp8mcq2pg6r47w43l0y8zkqm8a450s03"

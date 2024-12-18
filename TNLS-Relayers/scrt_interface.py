@@ -37,9 +37,22 @@ class SCRTInterface(BaseChainInterface):
 
         self.feegrant_address = feegrant_address
         self.address = str(self.private_key.acc_address)
+        # FIXME: Do we need `chain_id` here, or only in EthInterface?
+        # self.chain_id = chain_id
+        # FIXME: Do we need `self.nonce` here, or only on EthInterface and we use `sequence` here instead?
         self.wallet = self.provider.wallet(self.private_key)
         self.api_url = api_url
-        self.logger = getLogger()
+        self.logger = getLogger("SCRT Interface")
+        self.logger.setLevel(INFO)
+        handler = StreamHandler()
+        formatter = logging.Formatter("%(asctime)s [SCRT Interface: %(levelname)4.8s] %(message)s")
+        handler.setFormatter(formatter)
+        self.logger.addHandler(handler)
+        self.logger.propagate = False
+        # FIXME: Do we need `nonce_lock` here, or only on EthInterface?
+        # self.nonce_lock = Lock()
+        # FIXME: Do we need `lock` here?
+        # self.lock = Lock()
 
         # Initialize account number and sequence
         self.account_number = None
@@ -52,6 +65,7 @@ class SCRTInterface(BaseChainInterface):
         self.sync_interval = sync_interval
         self.executor = ThreadPoolExecutor(max_workers=1)
         self.schedule_sync()
+        self.logger.info(f"Initialized SCRT interface for contract {self.address}")
 
     def schedule_sync(self):
         """
@@ -195,6 +209,7 @@ class SCRTContract(BaseContractInterface):
 
     def __init__(self, interface, address, abi, code_hash):
         self.address = address
+        # FIXME: Do we need `self.nonce` here, or only on EthInterface and we use `sequence` here instead?
         self.code_hash = code_hash
         self.abi = json.loads(abi)
         self.interface = interface
@@ -205,7 +220,11 @@ class SCRTContract(BaseContractInterface):
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
         self.logger.propagate = False
+        # FIXME: Do we need `nonce_lock` here, or only on EthInterface?
+        # self.nonce_lock = Lock()
         self.lock = Lock()
+        # TODO: Do we need `self.sequence_lock = Lock()` here too?
+        # self.sequence_lock = Lock()
         self.logger.info(f"Initialized SCRT interface for contract {self.address}")
         pass
 

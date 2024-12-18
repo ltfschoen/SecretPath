@@ -5,6 +5,16 @@ This project was started by Leor Fishman, Benjamin Simon, Kent Worchester. Conti
 
 Docs (which are relatively barebones atm but will be being improved over time) can be found at [the docs](https://fortress-labs.gitbook.io/snakepath/) and [the docs] (https://docs.scrt.network/secret-network-documentation/development/ethereum-evm-developer-toolkit/basics/cross-chain-messaging/snakepath)
 
+# Usage (for Nunya)
+
+## Custom Gateway
+
+The directory ./SecretPath/TNLS-Gateways/public-gateway has been cloned and used in ./packages/secret-contracts/secret-gateway of this repo https://github.com/svub/nunya/pull/33
+
+## Custom Relayer
+
+This branch "nunya" in this fork of https://github.com/SecretSaturn/SecretPath is used to run a custom Relayer for https://github.com/svub/nunya.
+
 # License
 
 Licensed under the Apache License, Version 2.0 (the "License");
