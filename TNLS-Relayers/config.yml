@@ -200,7 +200,7 @@
   api_endpoint: "https://lcd.mainnet.secretsaturn.net"
   contract_address: "secret1qzk574v8lckjmqdg3r3qf3337pk45m7qd8x02a"
   code_hash: "012dd8efab9526dec294b6898c812ef6f6ad853e32172788f54ef3c305c1ecc5"
-  feegrant_address: "secret1tq6y8waegggp4fv2fcxk3zmpsmlfadyc7lsd69"
+  # feegrant_address: "secret1tq6y8waegggp4fv2fcxk3zmpsmlfadyc7lsd69"
 
 
 #Testnet Chains
@@ -426,7 +426,7 @@
   api_endpoint: "https://api.pulsar.scrttestnet.com"
   contract_address: "secret10ex7r7c4y704xyu086lf74ymhrqhypayfk7fkj"
   code_hash: "ad8ca07ffba1cb26ebf952c29bc4eced8319c171430993e5b5089887f27b3f70"
-  feegrant_address: "secret1gutgtpw0caqfsp8ja0r5yecv8jxz2y8vhpnck8"
+  # feegrant_address: "secret1gutgtpw0caqfsp8ja0r5yecv8jxz2y8vhpnck8"
 
 # Localhost Chains
 
@@ -449,4 +449,4 @@
   api_endpoint: "http://127.0.0.1:1317"
   contract_address: "secret1mfk7n6mc2cg6lznujmeckdh4x0a5ezf6hx6y8q"
   code_hash: "97653655266e70774ab8f0bf2ee2c17ff4a7f47d2e2fd477c69b52476841277b"
-  feegrant_address: "secret1ap26qrlp8mcq2pg6r47w43l0y8zkqm8a450s03"
+  # feegrant_address: "secret1ap26qrlp8mcq2pg6r47w43l0y8zkqm8a450s03"

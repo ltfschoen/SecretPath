@@ -10,7 +10,7 @@ import requests
 
 from secret_sdk.client.lcd import LCDClient
 from secret_sdk.client.lcd.api.tx import CreateTxOptions, BroadcastMode
-from secret_sdk.core import TxLog
+from secret_sdk.protobuf.tendermint.abci import Event
 from secret_sdk.exceptions import LCDResponseError
 from secret_sdk.key.raw import RawKey
 
@@ -89,6 +89,8 @@ class SCRTInterface(BaseChainInterface):
 
                 # Replace with your wallet address
                 url = f'{self.api_url}/cosmos/auth/v1beta1/accounts/{self.address}'
+                self.logger.info(f"sync_account_number_and_sequence: self.address: {self.address}")
+                self.logger.info(f"sync_account_number_and_sequence: url: {url}")
 
                 # Make the GET request to the URL
                 response = requests.get(url)
@@ -97,6 +99,8 @@ class SCRTInterface(BaseChainInterface):
 
                     # Extract account number and sequence from the JSON response
                     account_info = data.get('account', {})
+                    self.logger.info(f"sync_account_number_and_sequence: account_info {account_info}")
+                    self.logger.info(f"sync_account_number_and_sequence: self.sequence {self.sequence}")
                     self.account_number = account_info.get('account_number')
                     new_sequence = int(account_info.get('sequence', 0))
 
@@ -129,7 +133,8 @@ class SCRTInterface(BaseChainInterface):
         while broadcast_attempt < max_broadcast_attempts:
             try:
                 # Broadcast the transaction in SYNC mode
-                final_tx = self.provider.tx.broadcast_adapter(tx, mode=BroadcastMode.BROADCAST_MODE_ASYNC)
+                final_tx = self.provider.tx.broadcast_adapter(tx, mode=BroadcastMode.BROADCAST_MODE_SYNC)
+                print(final_tx)
                 tx_hash = final_tx.txhash
                 self.logger.info(f"Transaction broadcasted with hash: {tx_hash}")
 
@@ -322,6 +327,7 @@ class SCRTContract(BaseContractInterface):
             fee=fee
         )
         txn = self.interface.wallet.create_and_sign_tx(options=tx_options)
+        print(txn)
         self.interface.sequence = self.interface.sequence + 1
         return txn
 
@@ -352,7 +358,7 @@ class SCRTContract(BaseContractInterface):
         self.logger.info(f"Transaction result: {task_list}")
         return task_list, transaction_result
 
-    def parse_event_from_txn(self, event_name: str, logs: List[TxLog]):
+    def parse_event_from_txn(self, event_name: str, logs: List[Event]):
         """
         Parses the given event from the given logs
         Args:
