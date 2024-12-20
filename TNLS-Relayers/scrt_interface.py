@@ -23,7 +23,7 @@ class SCRTInterface(BaseChainInterface):
     NOTE: the below default private key is for testing only, and does not correspond to any real account/wallet
     """
 
-    def __init__(self, private_key="", api_url="", chain_id="", provider=None, feegrant_address=None, sync_interval=30, **kwargs):
+    def __init__(self, private_key="", api_url="", chain_id="", provider=None, feegrant_address=None, feepayer_address=None, sync_interval=30, **kwargs):
 
         if isinstance(private_key, str):
             self.private_key = RawKey.from_hex(private_key)
@@ -36,6 +36,7 @@ class SCRTInterface(BaseChainInterface):
             self.provider = provider
 
         self.feegrant_address = feegrant_address
+        self.feepayer_address = feepayer_address
         self.address = str(self.private_key.acc_address)
         # FIXME: Do we need `chain_id` here, or only in EthInterface?
         # self.chain_id = chain_id
@@ -106,7 +107,7 @@ class SCRTInterface(BaseChainInterface):
 
                     if self.sequence is None or new_sequence >= self.sequence:
                         self.sequence = new_sequence
-                        self.logger.info("Secret sequence synced")
+                        self.logger.info(f"Secret sequence synced: self.sequence {self.sequence}")
                     else:
                         self.logger.warning(
                             f"New sequence {new_sequence} is not greater than the old sequence {self.sequence}.")
@@ -318,6 +319,8 @@ class SCRTContract(BaseContractInterface):
         fee = self.interface.provider.tx.estimate_fee(options=tx_options)
         if self.interface.feegrant_address is not None:
             fee.granter = self.interface.feegrant_address
+        if self.interface.feepayer_address is not None:
+            fee.payer = self.interface.feepayer_address
         tx_options = CreateTxOptions(
             msgs=[txn_msgs],
             gas=gas,
