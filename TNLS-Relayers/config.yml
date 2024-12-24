@@ -448,6 +448,6 @@
   chain_id: "secretdev-1"
   api_endpoint: "http://127.0.0.1:1317"
   contract_address: "secret1mfk7n6mc2cg6lznujmeckdh4x0a5ezf6hx6y8q"
-  code_hash: "836a34c60637d684c044d4ddc1277e3d21ae1f440d2bb2d26870c81639d2f4c4"
+  code_hash: "b9fb512153812cd554884922d10c007bef9d2749d14ae9fda445e83710ee8c10"
   # feegrant_address: "secret1ap26qrlp8mcq2pg6r47w43l0y8zkqm8a450s03"
   # feepayer_address: "secret1glfedwlusunwly7q05umghzwl6nf2vj6wr38fg"
