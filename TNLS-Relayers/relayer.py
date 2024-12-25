@@ -159,6 +159,11 @@ class Relayer:
 
         self.logger.info(f"Routing task {vars(task)}")
 
+        # Check if the task has task_data with a task_id key to avoid `KeyError: 'task_id'`
+        if "task_id" not in task.task_data:
+            self.logger.warn(f"Task does not have task_data with key task_id")
+            return
+
         # Check if the task has a destination network
         if task.task_destination_network is None:
             self.logger.warning(f"Task {task} has no destination network, not routing")

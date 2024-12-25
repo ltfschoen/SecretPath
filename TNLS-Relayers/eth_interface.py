@@ -18,7 +18,8 @@ class EthInterface(BaseChainInterface):
     Implementation of BaseChainInterface for Ethereum.
     """
 
-    def __init__(self, private_key="", provider=None, contract_address="", chain_id="", api_endpoint="", timeout=1, sync_interval=30, **_kwargs):
+    # change to `sync_interval=5` to overcome this `Nonce too low` issue https://github.com/ltfschoen/SecretPath/issues/3
+    def __init__(self, private_key="", provider=None, contract_address="", chain_id="", api_endpoint="", timeout=1, sync_interval=5, **_kwargs):
         if provider is None:
             # If no provider, set a default with middleware for various blockchain scenarios
             provider = Web3(Web3.HTTPProvider(api_endpoint, request_kwargs={'timeout': timeout}))
@@ -68,6 +69,7 @@ class EthInterface(BaseChainInterface):
             with self.nonce_lock:
                 self.logger.info(f"Starting Chain-id {self.chain_id} nonce sync")
                 new_nonce = self.provider.eth.get_transaction_count(self.address, 'pending')
+                self.logger.info("Eth self.nonce | new_nonce: %s | %s", self.nonce, new_nonce)
                 if self.nonce is None or new_nonce >= self.nonce:
                     self.nonce = new_nonce
                     self.logger.info(f"Chain-id {self.chain_id} nonce synced")

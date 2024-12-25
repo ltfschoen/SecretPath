@@ -354,27 +354,28 @@ class SCRTContract(BaseContractInterface):
         transaction_result = self.interface.sign_and_send_transaction(txn)
         try:
             self.logger.info(f"Transaction result: {transaction_result}")
-            logs = transaction_result.logs
+            # Note: `transaction_result.logs` also exists, but its logs
+            # are not relevant to forwarding by the relayer
+            events = transaction_result.events
         except AttributeError:
-            logs = []
-        task_list = self.parse_event_from_txn('wasm', logs)
+            events = []
+        task_list = self.parse_event_from_txn('wasm', events)
         self.logger.info(f"Transaction result: {task_list}")
         return task_list, transaction_result
 
-    def parse_event_from_txn(self, event_name: str, logs: List[Event]):
+    def parse_event_from_txn(self, event_name: str, events: List[Event]):
         """
-        Parses the given event from the given logs
+        Parses the given event from the given events
         Args:
             event_name: which event to parse
-            logs: the logs to parse from
+            event logs: the event logs to parse from
 
         Returns: a list of tasks corresponding to parsed events
 
         """
         task_list = []
-        for log in logs:
-            events = [event for event in log.events if event['type'] == event_name]
-            for event in events:
+        for event in events:
+            if event['type'] == event_name:
                 attr_dict = {attribute['key']: attribute['value'] for attribute in event['attributes']}
                 task_list.append(Task(attr_dict))
         return task_list
