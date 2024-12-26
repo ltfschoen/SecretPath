@@ -19,7 +19,7 @@ class EthInterface(BaseChainInterface):
     """
 
     # change to `sync_interval=5` to overcome this `Nonce too low` issue https://github.com/ltfschoen/SecretPath/issues/3
-    def __init__(self, private_key="", provider=None, contract_address="", chain_id="", api_endpoint="", timeout=1, sync_interval=5, **_kwargs):
+    def __init__(self, private_key="", provider=None, contract_address="", chain_id="", api_endpoint="", timeout=1, sync_interval=3, **_kwargs):
         if provider is None:
             # If no provider, set a default with middleware for various blockchain scenarios
             provider = Web3(Web3.HTTPProvider(api_endpoint, request_kwargs={'timeout': timeout}))
