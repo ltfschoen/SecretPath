@@ -132,6 +132,9 @@ def generate_scrt_config(config_dict, provider=None):
     # Optional fee grant address
     feegrant_address = config_dict['feegrant_address'] if 'feegrant_address' in config_dict else None
 
+    # Optional fee payer address
+    feepayer_address = config_dict['feepayer_address'] if 'feepayer_address' in config_dict else None
+
     # Load the Secret contract ABI from 'secret_abi.json'
     with open(f'{Path(__file__).parent.absolute()}/secret_abi.json') as f:
         contract_schema = f.read()
@@ -146,6 +149,7 @@ def generate_scrt_config(config_dict, provider=None):
         provider=provider,
         chain_id=chain_id,
         feegrant_address=feegrant_address,
+        feepayer_address=feepayer_address,
         api_url=api_endpoint
     )
 

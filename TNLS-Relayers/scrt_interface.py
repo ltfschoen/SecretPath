@@ -10,7 +10,7 @@ import requests
 
 from secret_sdk.client.lcd import LCDClient
 from secret_sdk.client.lcd.api.tx import CreateTxOptions, BroadcastMode
-from secret_sdk.core import TxLog
+from secret_sdk.protobuf.tendermint.abci import Event
 from secret_sdk.exceptions import LCDResponseError
 from secret_sdk.key.raw import RawKey
 
@@ -23,7 +23,7 @@ class SCRTInterface(BaseChainInterface):
     NOTE: the below default private key is for testing only, and does not correspond to any real account/wallet
     """
 
-    def __init__(self, private_key="", api_url="", chain_id="", provider=None, feegrant_address=None, sync_interval=30, **kwargs):
+    def __init__(self, private_key="", api_url="", chain_id="", provider=None, feegrant_address=None, feepayer_address=None, sync_interval=30, **kwargs):
 
         if isinstance(private_key, str):
             self.private_key = RawKey.from_hex(private_key)
@@ -36,10 +36,24 @@ class SCRTInterface(BaseChainInterface):
             self.provider = provider
 
         self.feegrant_address = feegrant_address
+        self.feepayer_address = feepayer_address
         self.address = str(self.private_key.acc_address)
+        # FIXME: Do we need `chain_id` here, or only in EthInterface?
+        # self.chain_id = chain_id
+        # FIXME: Do we need `self.nonce` here, or only on EthInterface and we use `sequence` here instead?
         self.wallet = self.provider.wallet(self.private_key)
         self.api_url = api_url
-        self.logger = getLogger()
+        self.logger = getLogger("SCRT Interface")
+        self.logger.setLevel(INFO)
+        handler = StreamHandler()
+        formatter = logging.Formatter("%(asctime)s [SCRT Interface: %(levelname)4.8s] %(message)s")
+        handler.setFormatter(formatter)
+        self.logger.addHandler(handler)
+        self.logger.propagate = False
+        # FIXME: Do we need `nonce_lock` here, or only on EthInterface?
+        # self.nonce_lock = Lock()
+        # FIXME: Do we need `lock` here?
+        # self.lock = Lock()
 
         # Initialize account number and sequence
         self.account_number = None
@@ -52,6 +66,7 @@ class SCRTInterface(BaseChainInterface):
         self.sync_interval = sync_interval
         self.executor = ThreadPoolExecutor(max_workers=1)
         self.schedule_sync()
+        self.logger.info(f"Initialized SCRT interface for contract {self.address}")
 
     def schedule_sync(self):
         """
@@ -75,6 +90,8 @@ class SCRTInterface(BaseChainInterface):
 
                 # Replace with your wallet address
                 url = f'{self.api_url}/cosmos/auth/v1beta1/accounts/{self.address}'
+                self.logger.info(f"sync_account_number_and_sequence: self.address: {self.address}")
+                self.logger.info(f"sync_account_number_and_sequence: url: {url}")
 
                 # Make the GET request to the URL
                 response = requests.get(url)
@@ -83,12 +100,14 @@ class SCRTInterface(BaseChainInterface):
 
                     # Extract account number and sequence from the JSON response
                     account_info = data.get('account', {})
+                    self.logger.info(f"sync_account_number_and_sequence: account_info {account_info}")
+                    self.logger.info(f"sync_account_number_and_sequence: self.sequence {self.sequence}")
                     self.account_number = account_info.get('account_number')
                     new_sequence = int(account_info.get('sequence', 0))
 
                     if self.sequence is None or new_sequence >= self.sequence:
                         self.sequence = new_sequence
-                        self.logger.info("Secret sequence synced")
+                        self.logger.info(f"Secret sequence synced: self.sequence {self.sequence}")
                     else:
                         self.logger.warning(
                             f"New sequence {new_sequence} is not greater than the old sequence {self.sequence}.")
@@ -115,7 +134,8 @@ class SCRTInterface(BaseChainInterface):
         while broadcast_attempt < max_broadcast_attempts:
             try:
                 # Broadcast the transaction in SYNC mode
-                final_tx = self.provider.tx.broadcast_adapter(tx, mode=BroadcastMode.BROADCAST_MODE_ASYNC)
+                final_tx = self.provider.tx.broadcast_adapter(tx, mode=BroadcastMode.BROADCAST_MODE_SYNC)
+                print(final_tx)
                 tx_hash = final_tx.txhash
                 self.logger.info(f"Transaction broadcasted with hash: {tx_hash}")
 
@@ -195,6 +215,7 @@ class SCRTContract(BaseContractInterface):
 
     def __init__(self, interface, address, abi, code_hash):
         self.address = address
+        # FIXME: Do we need `self.nonce` here, or only on EthInterface and we use `sequence` here instead?
         self.code_hash = code_hash
         self.abi = json.loads(abi)
         self.interface = interface
@@ -205,7 +226,11 @@ class SCRTContract(BaseContractInterface):
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
         self.logger.propagate = False
+        # FIXME: Do we need `nonce_lock` here, or only on EthInterface?
+        # self.nonce_lock = Lock()
         self.lock = Lock()
+        # TODO: Do we need `self.sequence_lock = Lock()` here too?
+        # self.sequence_lock = Lock()
         self.logger.info(f"Initialized SCRT interface for contract {self.address}")
         pass
 
@@ -294,6 +319,8 @@ class SCRTContract(BaseContractInterface):
         fee = self.interface.provider.tx.estimate_fee(options=tx_options)
         if self.interface.feegrant_address is not None:
             fee.granter = self.interface.feegrant_address
+        if self.interface.feepayer_address is not None:
+            fee.payer = self.interface.feepayer_address
         tx_options = CreateTxOptions(
             msgs=[txn_msgs],
             gas=gas,
@@ -303,6 +330,7 @@ class SCRTContract(BaseContractInterface):
             fee=fee
         )
         txn = self.interface.wallet.create_and_sign_tx(options=tx_options)
+        print(txn)
         self.interface.sequence = self.interface.sequence + 1
         return txn
 
@@ -326,27 +354,28 @@ class SCRTContract(BaseContractInterface):
         transaction_result = self.interface.sign_and_send_transaction(txn)
         try:
             self.logger.info(f"Transaction result: {transaction_result}")
-            logs = transaction_result.logs
+            # Note: `transaction_result.logs` also exists, but its logs
+            # are not relevant to forwarding by the relayer
+            events = transaction_result.events
         except AttributeError:
-            logs = []
-        task_list = self.parse_event_from_txn('wasm', logs)
+            events = []
+        task_list = self.parse_event_from_txn('wasm', events)
         self.logger.info(f"Transaction result: {task_list}")
         return task_list, transaction_result
 
-    def parse_event_from_txn(self, event_name: str, logs: List[TxLog]):
+    def parse_event_from_txn(self, event_name: str, events: List[Event]):
         """
-        Parses the given event from the given logs
+        Parses the given event from the given events
         Args:
             event_name: which event to parse
-            logs: the logs to parse from
+            event logs: the event logs to parse from
 
         Returns: a list of tasks corresponding to parsed events
 
         """
         task_list = []
-        for log in logs:
-            events = [event for event in log.events if event['type'] == event_name]
-            for event in events:
+        for event in events:
+            if event['type'] == event_name:
                 attr_dict = {attribute['key']: attribute['value'] for attribute in event['attributes']}
                 task_list.append(Task(attr_dict))
         return task_list

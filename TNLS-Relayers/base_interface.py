@@ -15,6 +15,8 @@ solana_chains = [info['chain_id'] for key, info in data.items() if info['type'] 
 scrt_chains = [info['chain_id'] for key, info in data.items() if info['type'] == 'secret']
 
 # Define the mapping of task keys to message fields for Ethereum-based chains
+# Note: The `postExecution` function of Gateway.sol accepts these arguments. Further,
+# the `_info` property value contains `PostExecutionInfo`
 eth_task_keys_to_msg = {
     '_taskId': 'task_id',
     '_sourceNetwork': 'source_network',
@@ -110,6 +112,12 @@ class Task:
         task_data: The data associated with the task.
     """
 
+    # Note: The functions that are called in Gateway.sol populate a `struct ExecutionInfo`
+    # that contains more properties than that stored in `task_data` associated with a `task_id`,
+    # since `task_data` only contains:
+    # - `task_id`
+    # - `task_destination_network`
+    # - `routing_info` (Secret contract address)
     def __init__(self, task_dict):
         # Ensure the task dictionary is a standard dictionary
         task_dict = dict(task_dict)
