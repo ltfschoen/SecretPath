@@ -7,13 +7,22 @@ Docs (which are relatively barebones atm but will be being improved over time) c
 
 # Usage (for Nunya)
 
-## Custom Gateway
-
-The directory ./SecretPath/TNLS-Gateways/public-gateway has been cloned and used in ./packages/secret-contracts/secret-gateway of this repo https://github.com/svub/nunya/pull/33
-
 ## Custom Relayer
 
 This branch "nunya" in this fork of https://github.com/SecretSaturn/SecretPath is used to run a custom Relayer for https://github.com/svub/nunya.
+
+### Configuration
+
+It is necessary to generate the .env file, as shown below, and then add an Ethereum and Secret Network private keys in the .env file, excluding their '0x' prefix, as specified in the https://github.com/svub/nunya setup instructions.
+```
+cp ./TNLS-Relayers/.env.example ./TNLS-Relayers/.env
+```
+
+Note: ./TNLS-Relayers/config.yml should be automatically updated via scripts by https://github.com/svub/nunya that uses it as a Git Submodule.
+
+## Custom Gateway
+
+The directory ./SecretPath/TNLS-Gateways/public-gateway has been cloned and used in ./packages/secret-contracts/secret-gateway of this repo https://github.com/svub/nunya/pull/33
 
 # License
 
