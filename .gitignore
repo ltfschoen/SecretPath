@@ -4,29 +4,12 @@
 .DS_Store
 yarn.lock
 
-# Foundry stuff
-# --------------------------
-# Compiler files
-cache/
-out/
-
 # Ignores development broadcast logs
 !/broadcast
 /broadcast/*
 /broadcast/*/31337
 .vscode
-target/
-TNLS-Gateways/secret/contract.wasm
-TNLS-Gateways/secret/contract.wasm.gz
 .env
 __pycache__/
-TNLS-Gateways/public-gateway/broadcast/*
-TNLS-Gateways/public-gateway/lib/*
-*.gz
-TNLS-Samples/RNG/contract.wasm.gz
-/TNLS-Gateways/solana-gateway/node_modules
 /venv
-/TNLS-Gateways/solana-gateway/.anchor/program-logs
-/secret-deploy/node_modules
-/secret-deploy/secret_gateway.log
-/secret-deploy/secret_sample.log
+
